@@ -100,7 +100,7 @@ public final class LogTablet {
     private final Scheduler scheduler;
     private final ScheduledFuture<?> writerExpireCheck;
     private final LogFormat logFormat;
-    private final int tieredLogLocalSegments;
+    private volatile int tieredLogLocalSegments;
     private final Clock clock;
     private final boolean isChangeLog;
 
@@ -243,6 +243,10 @@ public final class LogTablet {
 
     public boolean isDataLakeEnabled() {
         return isDataLakeEnabled;
+    }
+
+    public int getTieredLogLocalSegments() {
+        return tieredLogLocalSegments;
     }
 
     public long getLakeTableSnapshotId() {
@@ -549,6 +553,10 @@ public final class LogTablet {
         if (lakeMaxTimestamp > this.lakeMaxTimestamp) {
             this.lakeMaxTimestamp = lakeMaxTimestamp;
         }
+    }
+
+    public void updateTieredLogLocalSegments(int tieredLogLocalSegments) {
+        this.tieredLogLocalSegments = tieredLogLocalSegments;
     }
 
     public void loadWriterSnapshot(long lastOffset) throws IOException {

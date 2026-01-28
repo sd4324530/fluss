@@ -249,6 +249,7 @@ public final class Replica {
 
         this.logTablet = createLog(lazyHighWatermarkCheckpoint);
         this.logTablet.updateIsDataLakeEnabled(tableConfig.isDataLakeEnabled());
+        this.logTablet.updateTieredLogLocalSegments(tableConfig.getTieredLogLocalSegments());
         this.clock = clock;
         registerMetrics();
     }
@@ -584,6 +585,21 @@ public final class Replica {
                 tableBucket,
                 old,
                 isDataLakeEnabled);
+    }
+
+    public void updateTieredLogLocalSegments(int tieredLogLocalSegments) {
+        int old = logTablet.getTieredLogLocalSegments();
+        if (old == tieredLogLocalSegments) {
+            return;
+        }
+
+        logTablet.updateTieredLogLocalSegments(tieredLogLocalSegments);
+
+        LOG.info(
+                "Replica for {} tieredLogLocalSegments changed from {} to {}",
+                tableBucket,
+                old,
+                tieredLogLocalSegments);
     }
 
     private void createKv() {

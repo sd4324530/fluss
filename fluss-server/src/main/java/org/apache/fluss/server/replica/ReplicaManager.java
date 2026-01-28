@@ -466,13 +466,16 @@ public class ReplicaManager {
 
     private void updateReplicaTableConfig(ClusterMetadata clusterMetadata) {
         Map<Long, Boolean> tableIdToLakeFlag = new HashMap<>();
+        Map<Long, Integer> tieredLogLocalSegmentsMap = new HashMap<>();
         for (TableMetadata tableMetadata : clusterMetadata.getTableMetadataList()) {
             TableInfo tableInfo = tableMetadata.getTableInfo();
+            long tableId = tableInfo.getTableId();
             if (tableInfo.getTableConfig().getDataLakeFormat().isPresent()) {
-                long tableId = tableInfo.getTableId();
                 boolean dataLakeEnabled = tableInfo.getTableConfig().isDataLakeEnabled();
                 tableIdToLakeFlag.put(tableId, dataLakeEnabled);
             }
+            tieredLogLocalSegmentsMap.put(
+                    tableId, tableInfo.getTableConfig().getTieredLogLocalSegments());
         }
 
         if (tableIdToLakeFlag.isEmpty()) {
@@ -486,6 +489,9 @@ public class ReplicaManager {
                 long tableId = replica.getTableBucket().getTableId();
                 if (tableIdToLakeFlag.containsKey(tableId)) {
                     replica.updateIsDataLakeEnabled(tableIdToLakeFlag.get(tableId));
+                }
+                if (tieredLogLocalSegmentsMap.containsKey(tableId)) {
+                    replica.updateTieredLogLocalSegments(tieredLogLocalSegmentsMap.get(tableId));
                 }
             }
         }
